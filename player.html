@@ -1,0 +1,148 @@
+<html><head>
+    <meta charset="utf-8" content="" http-equiv="content-type">
+    <title>虾米音乐搜索</title>
+    <script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/1.8.3/jquery.min.js"></script>
+    <style type="text/css">
+        #text {
+            border: 1px solid black;
+            margin: 0px;
+            height: 20px;
+            width: 302px;
+            padding: 5px;
+        }
+        #list {
+            display:none;
+            border: 1px solid black;
+            width: 312px;
+            margin-top: -1px;
+        }
+        button {
+            margin-left:6px;
+            border:1px solid black;
+            font-size:14px;
+            background:white;
+            color:black;
+            height:32px;
+            width:80px;
+        }
+        button:hover {
+            background:black;
+            color:white;
+        }
+        p {
+            margin: 0;
+            padding: 6px 10px;
+            cursor: pointer;
+            border-bottom: 1px solid black;
+        }
+        p:hover, #navi:hover {
+            background:black;
+            color:white;
+        }
+        #navi {
+            padding:6px 0;
+            cursor: pointer;
+        }
+        #show {
+            margin:10px 0;
+        }
+        textarea {
+            margin: 10px 0;
+            width: 388px;
+            height: 100px;
+            display: block;
+            resize: none;
+            padding:5px;
+            border:1px solid black;
+        }
+        #con {
+            overflow:hidden;
+            height:14px;
+            width:7px;
+            float:left;
+            margin:2px 5px 0 0;
+        }
+        #play {
+            width:10px;
+            height: 10px;
+            background: #09F;
+            -webkit-transform: rotate(45deg);
+            -moz-transform: rotate(45deg);
+            -o-transform: rotate(45deg);
+            transform: rotate(45deg);
+            overflow:hidden;
+            margin-left: -5px;
+            margin-top: 2px;
+        }
+        #pause {
+            border-left:2px solid #09F;
+            border-right:2px solid #09F;
+            width:3px;
+            height:100%;
+            display:none;
+        }
+        #player {
+            border: 1px solid #09F;
+            padding: 2px 5px;
+            border-radius: 5px;
+            width: 300px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<input type="text" id="text" value="">
+<input type="hidden" id="page" value="1">
+<button onclick="$('#result').html('');search();">搜索</button>
+<div id="list">
+    <div id="result"></div>
+    <div id="navi"></div>
+</div>
+<div id="show">
+</div>
+<script type="text/javascript">
+    $("#navi").click(function(){
+        var page = parseInt($("#page").val());
+        $("#page").val(++page);
+        search();
+    });
+    function urldecode(data) {
+        return decodeURIComponent(data);
+    }
+    $("body").keydown(function() {
+        if (event.keyCode == "13") {//keyCode=13是回车键
+            $('button').click();
+        }
+    });
+    function search() {
+        $.ajax({
+            url: "http://www.xiami.com/app/nineteen/search/key/"+$('#text').val()+"/page/"+$('#page').val(),
+            type: "get",
+            dataType: "jsonp",
+            success: function(data, status) {
+                $('#show').html('');
+                $("#list").css('display','block');
+                if(data.total / 8 != 1) {
+                    $('#navi').html('<center>载入更多</center>');
+                }
+                $.each(data.results, function(i,item){
+                    $('<p onclick="show(\''+item.song_id+'\');">'+urldecode(item.song_name)+' - '+urldecode(item.artist_name)+'</p>').appendTo('#result');
+                });
+            },
+            error: function() {
+                $('#list').css('display','none');
+                $('#result').html('failed');
+            }
+        });
+    }
+    function show(id) {
+        $("#page").val('1');
+        $("#list").css('display', 'none');
+        var html = '<iframe src="http://imnerd.org/lab/search/show.html#'+id+'" style="width:255px;height:35px;" frameborder="0" scrolling="no"></iframe>';
+        $('#show').html(html);
+        $('#show').append('<br><textarea style="width:394px;height:150px;">'+html+'</textarea>');
+    }
+</script>
+
+
+</body></html>

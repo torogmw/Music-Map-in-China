@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+<script type="text/javascript" src="jquery-ui-map-3.0-rc/ui/jquery.ui.map.js"></script>
+<script type="text/javascript" src="jquery-ui-map-3.0-rc/ui/jquery.ui.map.overlays.js"></script>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+<style type="text/css">
+* {
+  margin: 0;
+  padding: 0;
+}
+
+a,
+a:link { 
+  text-decoration: none;
+}
+a:focus,
+a:hover {
+  color: #fff;
+}
+a:active {
+   color: #fff;
+    border-bottom-color: #fff;
+}
+
+body {
+  height: 100%;
+  background-color: #333;
+}
+body {
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+}
+.header {
+  padding-top: 20px;
+  padding-left: 160px;
+  padding-right: 160px;
+}
+/*
+ * Header
+ */
+.masthead-brand {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.masthead-nav > li {
+  display: inline-block;
+}
+.masthead-nav > li + li {
+  margin-left: 20px;
+}
+.masthead-nav > li > a {
+  padding-right: 0;
+  padding-left: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff; /* IE8 proofing */
+  color: rgba(255,255,255,.75);
+  border-bottom: 2px solid transparent;
+}
+.masthead-nav > li > a:hover,
+.masthead-nav > li > a:focus {
+  background-color: transparent;
+  border-bottom-color: rgba(255,255,255,.25);
+}
+.masthead-nav > .active > a,
+.masthead-nav > .active > a:hover,
+.masthead-nav > .active > a:focus {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+@media (min-width: 768px) {
+  .masthead-brand {
+    float: left;
+  }
+  .masthead-nav {
+    float: right;
+  }
+}
+
+#content1{
+  padding-top: 100px;
+  padding-bottom: 100px;
+  height: 100%;
+}
+#text{
+  text-align: left;
+  font-size: 16px;
+}
+ </style>
+  </head>
+  <body>
+
+    <div class="header">
+    <h3 class="masthead-brand">Music Preference Based on Location</h3>
+              <ul class="nav masthead-nav">
+                <li class="active"><a href="#map">Map</a></li>
+                <li><a href="#graph">Graphs</a></li>
+              </ul>
+    </div>
+    <div id="content1">
+      <div id="map_canvas" style="width:35em;height:35em; display: inline-block;"><a id="map"></a></div>
+      <div id="text" style="width:33.3em;max-width:33.3em;height:35em; float:right; margin-right:70px; display: inline-block; border-style:groove; border-color:#A1A1A1; border-width:5px; position:relative;">
+        <div class="innertext"style="margin-left:15px;margin-top:15px;">
+        Click the city to see related information</br>
+        Location:
+        <div id="city" style="width:33.3em;max-width:33.3em;margin-right:70px; margin-left:15px;display: inline-block;  "></div>
+        Singer:
+        <div id="singer" style="width:33.3em;max-width:33.3em;  margin-right:70px;margin-left:15px; display: inline-block;  "></div>
+        Score:
+        <div id="score" style="width:33.3em;max-width:33.3em;  margin-right:70px;margin-left:15px; display: inline-block; "></div>
+        Genre:
+        <div id="genre" style="width:33.3em;max-width:33.3em;  margin-right:70px;margin-left:15px; display: inline-block; "></div>
+        Link:
+        <div id="link" style="width:33.3em;max-width:33.3em; margin-right:70px;margin-left:15px; display:inline-block; "></div>
+        BioInfo:
+        <div id="bio" style="width:33.3em;max-width:33.3em;  margin-right:70px; margin-left:15px;display: inline-block;  "></div>
+         </div>
+       </div>
+      </div>
+       
+      <div style="width:33.3em;height:35em; margin-right:70px; display: block; "><a id="graph"></a></div>
+  
+    
+
+<script type="text/javascript">
+
+var yourStartLatLng = new google.maps.LatLng(35, 105);
+
+$('#map_canvas').gmap({'center': yourStartLatLng, 'zoom':4}).bind('init', function() { 
+  // This URL won't work on your localhost, so you need to change it
+  // see http://en.wikipedia.org/wiki/Same_origin_policy
+  $.getJSON( 'mapdata.json', function(data) {
+    $.each( data, function(i, marker) {
+      $('#map_canvas').gmap('addShape', 'Circle', 
+        { 
+          'strokeColor': "#FF0000", 'strokeOpacity': 0.4, 'strokeWeight': 2, 'fillColor': "#FF0000", 'fillOpacity': 0.3, 
+          'center': new google.maps.LatLng(marker.Latitude, marker.Longitude), 'radius': Math.sqrt(Math.sqrt(marker.Total))*30000 
+        })
+      .click(function() {
+        
+        $( "#city").html(function(){
+          return marker['Location']+"     "+marker['Location_C'];
+        });
+        $( "#singer").html(function(){
+          return marker['Singer']+"     "+marker['Singer_C'];
+        });
+        $( "#score").html(function(){
+          return marker['Score'];
+        });
+        $( "#genre").html(function(){
+          return marker['Genre'];
+        });
+        $( "#link").html(function(){
+          return marker['Link to xiami'];
+        });
+        $( "#bio").html(function(){
+          return marker['Bioinfo'];
+        });
+      });
+    });
+  });
+});
+
+var request = new XMLHttpRequest();
+request.open('GET', 'mayday - cangjian.mp3', true);
+request.responseType = 'arraybuffer';
+
+// Fix up prefixing
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+var context = new AudioContext();
+
+playSound(context)
+function playSound(buffer) {
+    var source = context.createBufferSource(); // creates a sound source
+    source.buffer = buffer;                    // tell the source which sound to play
+    source.connect(context.destination);       // connect the source to the context's destination (the speakers)
+    source.start(0);                           // play the source now
+    // note: on older systems, may have to use deprecated noteOn(time);
+}
+
+
+    </script>
+      </body>
+</html>
