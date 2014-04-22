@@ -31,6 +31,19 @@ body {
   height: 100%;
   background-color: #333;
 }
+button {
+    margin-left:6px;
+    border:1px white;
+    font-size:14px;
+    background:black;
+    color:white;
+    height:32px;
+    width:160px;
+}
+button:hover {
+    background:black;
+    color:grey;
+}
 body {
   color: #fff;
   text-align: center;
@@ -93,9 +106,83 @@ body {
 }
 #text{
   text-align: left;
-  font-size: 16px;
+  font-size: 20px;
 }
- </style>
+/* player style */
+#text {
+    border: 1px solid black;
+    margin: 0px;
+    height: 20px;
+    width: 302px;
+    padding: 5px;
+}
+#list {
+    display:none;
+    border: 1px solid black;
+    width: 312px;
+    margin-top: -1px;
+}
+p {
+    margin: 0;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid black;
+}
+p:hover, #navi:hover {
+    background:black;
+    color:white;
+}
+#navi {
+    padding:6px 0;
+    cursor: pointer;
+}
+#show {
+    margin:10px 0;
+}
+textarea {
+    margin: 10px 0;
+    width: 388px;
+    height: 100px;
+    display: block;
+    resize: none;
+    padding:5px;
+    border:1px solid black;
+}
+#con {
+    overflow:hidden;
+    height:14px;
+    width:7px;
+    float:left;
+    margin:2px 5px 0 0;
+}
+#play {
+    width:10px;
+    height: 10px;
+    background: #09F;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    overflow:hidden;
+    margin-left: -5px;
+    margin-top: 2px;
+}
+#pause {
+    border-left:2px solid #09F;
+    border-right:2px solid #09F;
+    width:3px;
+    height:100%;
+    display:none;
+}
+#player {
+    border: 1px solid #09F;
+    padding: 2px 5px;
+    border-radius: 5px;
+    width: 300px;
+    overflow: hidden;
+}
+
+</style>
   </head>
   <body>
 
@@ -107,8 +194,8 @@ body {
               </ul>
     </div>
     <div id="content1">
-      <div id="map_canvas" style="width:35em;height:35em; display: inline-block;"><a id="map"></a></div>
-      <div id="text" style="width:33.3em;max-width:33.3em;height:35em; float:right; margin-right:70px; display: inline-block; border-style:groove; border-color:#A1A1A1; border-width:5px; position:relative;">
+      <div id="map_canvas" style="width:70em;height:70em; display: inline-block;"><a id="map"></a></div>
+      <div id="text" style="width:25.3em;max-width:30.3em;height:40em; float:right; margin-right:70px; display: inline-block; border-style:groove; border-color:#A1A1A1; border-width:5px; position:relative;">
         <div class="innertext"style="margin-left:15px;margin-top:15px;">
         Click the city to see related information</br>
         Location:
@@ -123,8 +210,17 @@ body {
         <div id="link" style="width:33.3em;max-width:33.3em; margin-right:70px;margin-left:15px; display:inline-block; "></div>
         BioInfo:
         <div id="bio" style="width:33.3em;max-width:33.3em;  margin-right:70px; margin-left:15px;display: inline-block;  "></div>
+        </div>
+          <input type="hidden" id="page" value="1">
+          <button onclick="$('#result').html('');search();">Audio Preview</button>
+          <div id="list">
+              <div id="result"></div>
+              <div id="navi"></div>
+          </div>
+          <div id="show">
+          </div>
          </div>
-       </div>
+
       </div>
        
       <div style="width:33.3em;height:35em; margin-right:70px; display: block; "><a id="graph"></a></div>
@@ -134,6 +230,7 @@ body {
 <script type="text/javascript">
 
 var yourStartLatLng = new google.maps.LatLng(35, 105);
+var keyword = 'random'
 
 $('#map_canvas').gmap({'center': yourStartLatLng, 'zoom':4}).bind('init', function() { 
   // This URL won't work on your localhost, so you need to change it
@@ -151,6 +248,11 @@ $('#map_canvas').gmap({'center': yourStartLatLng, 'zoom':4}).bind('init', functi
           return marker['Location']+"     "+marker['Location_C'];
         });
         $( "#singer").html(function(){
+            var k = marker['Singer'].toString();
+            var ck = marker['Singer_C'].toString();
+            keyword = ck;
+            if (!keyword) keyword = k;
+
           return marker['Singer']+"     "+marker['Singer_C'];
         });
         $( "#score").html(function(){
@@ -160,7 +262,10 @@ $('#map_canvas').gmap({'center': yourStartLatLng, 'zoom':4}).bind('init', functi
           return marker['Genre'];
         });
         $( "#link").html(function(){
-          return marker['Link to xiami'];
+
+          var description = marker['Singer']+"     "+marker['Singer_C'] + ' @ Xiami';
+          var str = marker['Link to xiami'];
+          return description.link(str);;
         });
         $( "#bio").html(function(){
           return marker['Bioinfo'];
@@ -170,22 +275,48 @@ $('#map_canvas').gmap({'center': yourStartLatLng, 'zoom':4}).bind('init', functi
   });
 });
 
-var request = new XMLHttpRequest();
-request.open('GET', 'mayday - cangjian.mp3', true);
-request.responseType = 'arraybuffer';
-
-// Fix up prefixing
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
-var context = new AudioContext();
-
-playSound(context)
-function playSound(buffer) {
-    var source = context.createBufferSource(); // creates a sound source
-    source.buffer = buffer;                    // tell the source which sound to play
-    source.connect(context.destination);       // connect the source to the context's destination (the speakers)
-    source.start(0);                           // play the source now
-    // note: on older systems, may have to use deprecated noteOn(time);
+$("#navi").click(function(){
+    var page = parseInt($("#page").val());
+    $("#page").val(++page);
+    search();
+});
+function urldecode(data) {
+    return decodeURIComponent(data);
 }
+$("body").keydown(function() {
+    if (event.keyCode == "13") {//keyCode=13 is enter
+        $('button').click();
+    }
+});
+function search() {
+    $.ajax({
+        url: "http://www.xiami.com/app/nineteen/search/key/"+keyword+"/page/"+$('#page').val(),
+        type: "get",
+        dataType: "jsonp",
+        success: function(data, status) {
+            $('#show').html('');
+            $("#list").css('display','block');
+            if(data.total / 8 != 1) {
+                $('#navi').html('<center>more</center>');
+            }
+            $.each(data.results, function(i,item){
+                $('<p onclick="show(\''+item.song_id+'\');">'+urldecode(item.song_name)+' - '+urldecode(item.artist_name)+'</p>').appendTo('#result');
+            });
+        },
+        error: function() {
+            $('#list').css('display','none');
+            $('#result').html('failed');
+        }
+    });
+}
+function show(id) {
+    $("#page").val('1');
+    $("#list").css('display', 'none');
+    var html = '<iframe src="http://imnerd.org/lab/search/show.html#'+id+'" style="width:255px;height:35px;" frameborder="0" scrolling="no"></iframe>';
+    $('#show').html(html);
+    //$('#show').append('<br><textarea style="width:394px;height:150px;">'+html+'</textarea>');
+}
+
 
 
     </script>
