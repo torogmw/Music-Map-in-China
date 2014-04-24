@@ -6,6 +6,7 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 <script type="text/javascript" src="jquery-ui-map-3.0-rc/ui/jquery.ui.map.js"></script>
 <script type="text/javascript" src="jquery-ui-map-3.0-rc/ui/jquery.ui.map.overlays.js"></script>
+<script src="http://d3js.org/d3.v2.min.js"></script>
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
 <style type="text/css">
@@ -104,6 +105,13 @@ body {
   padding-bottom: 100px;
   height: 100%;
 }
+
+#content2{
+    padding-top: 100px;
+    padding-bottom: 100px;
+    height: 100%;
+}
+
 #text{
   text-align: left;
   font-size: 20px;
@@ -222,11 +230,11 @@ textarea {
          </div>
 
       </div>
-       
-      <div style="width:33.3em;height:35em; margin-right:70px; display: block; "><a id="graph"></a></div>
-  
-    
-
+    <div id="content2">
+      <div style="width:33.3em;height:70em; margin-right:70px; display: inline-block; "><a id="graph"></a></div>
+      <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_female"></a></div>
+      <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_male"></a></div>
+    </div>
 <script type="text/javascript">
 
 var yourStartLatLng = new google.maps.LatLng(35, 105);
@@ -317,8 +325,326 @@ function show(id) {
     //$('#show').append('<br><textarea style="width:394px;height:150px;">'+html+'</textarea>');
 }
 
+// for overall barchart
+function renderChart() {
+    var data = d3.csv.parse(d3.select('#csv').text());
+    var valueLabelWidth = 50; // space reserved for value labels (right)
+    var barHeight = 25; // height of one bar
+    var barLabelWidth = 200; // space reserved for bar labels
+    var barLabelPadding = 5; // padding between bar and bar labels (left)
+    var gridLabelHeight = 30; // space reserved for gridline labels
+    var gridChartOffset = 3; // space between start of grid and first bar
+    var maxBarWidth = 500; // width of the bar with the max value
+
+// accessor functions
+    var barLabel = function(d) { return d['name']; };
+    var barValue = function(d) { return parseFloat(d['TotalCount']); };
+    var color = d3.scale.ordinal()
+            .range(["#3333FF", "#3399FF", "#6699FF", "#99CCFF", "#CCCCFF", "#FFFFFF", "#FFFFCC"]);
+    var color2 = d3.scale.ordinal()
+            .range(["pink", "darkorange", "red", "darkred", "lightyellow", "orange", "#FFFFCC"]);
+    var area = function(d) { return d['From']; }
+
+// scales
+    var yScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barHeight]);
+    var y = function(d, i) { return yScale(i); };
+    var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
+    var x = d3.scale.linear().domain([0, d3.max(data, barValue)+50]).range([0, maxBarWidth]);
+// svg container element
+    var chart = d3.select('#graph').append("svg")
+            .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth)
+            .attr('height', gridLabelHeight + gridChartOffset + data.length * barHeight);
+// grid line labels
+    var gridContainer = chart.append('g')
+            .attr('transform', 'translate(' + barLabelWidth + ',' + gridLabelHeight + ')');
+    gridContainer.selectAll("text").data(x.ticks(10)).enter().append("text")
+            .attr("x", x)
+            .attr("dy", -3)
+            .attr("text-anchor", "middle")
+            .attr('fill', 'white')
+            .text(String);
+// vertical grid lines
+    gridContainer.selectAll("line").data(x.ticks(10)).enter().append("line")
+            .attr("x1", x)
+            .attr("x2", x)
+            .attr("y1", 0)
+            .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+            .style("stroke", "#ccc");
+// bar labels
+    var labelsContainer = chart.append('g')
+            .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + (gridLabelHeight + gridChartOffset) + ')');
+    labelsContainer.selectAll('text').data(data).enter().append('text')
+            .attr('y', yText)
+            .attr('stroke', 'none')
+            .attr('fill', 'white')
+            .attr("dy", ".35em") // vertical-align: middle
+            .attr('text-anchor', 'end')
+            .text(barLabel);
+// bars
+    var barsContainer = chart.append('g')
+            .attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')');
+    barsContainer.selectAll("rect").data(data).enter().append("rect")
+            .attr('y', y)
+            .attr('height', yScale.rangeBand())
+            .attr('width', function(d) { return x(barValue(d)); })
+            .attr('stroke', 'white')
+            .attr('fill', function(d){
+                if(area(d)=="HK")
+                    return color2(0);
+                else if(area(d)=="TW")
+                    return color2(1);
+                else if(area(d)=="MD")
+                    return color2(2);
+                else if(area(d)=="ML")
+                    return color2(3);
+                else if(area(d)=="SP")
+                    return color2(4);
+                else return color2(5);
+            });
+// bar value labels
+    barsContainer.selectAll("text").data(data).enter().append("text")
+            .attr("x", function(d) { return x(barValue(d)); })
+            .attr("y", yText)
+            .attr("dx", 3) // padding-left
+            .attr("dy", ".35em") // vertical-align: middle
+            .attr("text-anchor", "start") // text-align: right
+            .attr("fill", "white")
+            .attr("stroke", "none")
+            .text(function(d) { return d3.round(barValue(d), 2); });
+// start line
+    barsContainer.append("line")
+            .attr("y1", -gridChartOffset)
+            .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+            .style("stroke", "#000");
+
+}
+// for female bar chart
+function renderChart2() {
+
+    var data = d3.csv.parse(d3.select('#csv2').text());
+    var valueLabelWidth = 40; // space reserved for value labels (right)
+    var barHeight = 40; // height of one bar
+    var barLabelWidth = 100; // space reserved for bar labels
+    var barLabelPadding = 5; // padding between bar and bar labels (left)
+    var gridLabelHeight = 18; // space reserved for gridline labels
+    var gridChartOffset = 3; // space between start of grid and first bar
+    var maxBarWidth = 420; // width of the bar with the max value
+
+// accessor functions
+    var barLabel = function(d) { return d['Female']; };
+    var barValue = function(d) { return parseFloat(d['FemaleCount']); };
+
+// scales
+    var yScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barHeight]);
+    var y = function(d, i) { return yScale(i); };
+    var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
+    var x = d3.scale.linear().domain([0, d3.max(data, barValue)+10]).range([0, maxBarWidth]);
+// svg container element
+    var chart = d3.select('#graph_female').append("svg")
+            .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth)
+            .attr('height', gridLabelHeight + gridChartOffset + data.length * barHeight);
+// grid line labels
+    var gridContainer = chart.append('g')
+            .attr('transform', 'translate(' + barLabelWidth + ',' + gridLabelHeight + ')');
+    gridContainer.selectAll("text").data(x.ticks(10)).enter().append("text")
+            .attr("x", x)
+            .attr("dy", -3)
+            .attr("text-anchor", "middle")
+            .attr('fill', 'white')
+            .text(String);
+// vertical grid lines
+    gridContainer.selectAll("line").data(x.ticks(10)).enter().append("line")
+            .attr("x1", x)
+            .attr("x2", x)
+            .attr("y1", 0)
+            .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+            .style("stroke", "#ccc");
+// bar labels
+    var labelsContainer = chart.append('g')
+            .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + (gridLabelHeight + gridChartOffset) + ')');
+    labelsContainer.selectAll('text').data(data).enter().append('text')
+            .attr('y', yText)
+            .attr('stroke', 'none')
+            .attr('fill', 'white')
+            .attr("dy", ".35em") // vertical-align: middle
+            .attr('text-anchor', 'end')
+            .text(barLabel);
+// bars
+    var barsContainer = chart.append('g')
+            .attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')');
+    barsContainer.selectAll("rect").data(data).enter().append("rect")
+            .attr('y', y)
+            .attr('height', yScale.rangeBand())
+            .attr('width', function(d) { return x(barValue(d)); })
+            .attr('stroke', 'white')
+            .attr('fill', 'pink');
+// bar value labels
+    barsContainer.selectAll("text").data(data).enter().append("text")
+            .attr("x", function(d) { return x(barValue(d)); })
+            .attr("y", yText)
+            .attr("dx", 3) // padding-left
+            .attr("dy", ".35em") // vertical-align: middle
+            .attr("text-anchor", "start") // text-align: right
+            .attr("fill", "white")
+            .attr("stroke", "none")
+            .text(function(d) { return d3.round(barValue(d), 2); });
+// start line
+    barsContainer.append("line")
+            .attr("y1", -gridChartOffset)
+            .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+            .style("stroke", "#000");
+}
+
+// for male
+function renderChart3() {
+    var data = d3.csv.parse(d3.select('#csv3').text());
+    var valueLabelWidth = 40; // space reserved for value labels (right)
+    var barHeight = 40; // height of one bar
+    var barLabelWidth = 100; // space reserved for bar labels
+    var barLabelPadding = 5; // padding between bar and bar labels (left)
+    var gridLabelHeight = 18; // space reserved for gridline labels
+    var gridChartOffset = 3; // space between start of grid and first bar
+    var maxBarWidth = 420; // width of the bar with the max value
+
+// accessor functions
+    var barLabel = function(d) { return d['Male']; };
+    var barValue = function(d) { return parseFloat(d['MaleCount']); };
+
+// scales
+    var yScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barHeight]);
+    var y = function(d, i) { return yScale(i); };
+    var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
+    var x = d3.scale.linear().domain([0, d3.max(data, barValue)+20]).range([0, maxBarWidth]);
+// svg container element
+    var chart = d3.select('#graph_male').append("svg")
+            .attr('width', maxBarWidth + barLabelWidth + valueLabelWidth)
+            .attr('height', gridLabelHeight + gridChartOffset + data.length * barHeight);
+// grid line labels
+    var gridContainer = chart.append('g')
+            .attr('transform', 'translate(' + barLabelWidth + ',' + gridLabelHeight + ')');
+    gridContainer.selectAll("text").data(x.ticks(10)).enter().append("text")
+            .attr("x", x)
+            .attr("dy", -3)
+            .attr("text-anchor", "middle")
+            .attr('fill', 'white')
+            .text(String);
+// vertical grid lines
+    gridContainer.selectAll("line").data(x.ticks(10)).enter().append("line")
+            .attr("x1", x)
+            .attr("x2", x)
+            .attr("y1", 0)
+            .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+            .style("stroke", "#ccc");
+// bar labels
+    var labelsContainer = chart.append('g')
+            .attr('transform', 'translate(' + (barLabelWidth - barLabelPadding) + ',' + (gridLabelHeight + gridChartOffset) + ')');
+    labelsContainer.selectAll('text').data(data).enter().append('text')
+            .attr('y', yText)
+            .attr('stroke', 'none')
+            .attr('fill', 'white')
+            .attr("dy", ".35em") // vertical-align: middle
+            .attr('text-anchor', 'end')
+            .text(barLabel);
+// bars
+    var barsContainer = chart.append('g')
+            .attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')');
+    barsContainer.selectAll("rect").data(data).enter().append("rect")
+            .attr('y', y)
+            .attr('height', yScale.rangeBand())
+            .attr('width', function(d) { return x(barValue(d)); })
+            .attr('stroke', 'white')
+            .attr('fill', 'steelblue');
+// bar value labels
+    barsContainer.selectAll("text").data(data).enter().append("text")
+            .attr("x", function(d) { return x(barValue(d)); })
+            .attr("y", yText)
+            .attr("dx", 3) // padding-left
+            .attr("dy", ".35em") // vertical-align: middle
+            .attr("text-anchor", "start") // text-align: right
+            .attr("fill", "white")
+            .attr("stroke", "none")
+            .text(function(d) { return d3.round(barValue(d), 2); });
+// start line
+    barsContainer.append("line")
+            .attr("y1", -gridChartOffset)
+            .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+            .style("stroke", "#000");
+
+}
+</script>
 
 
-    </script>
+
+<script src = "Top_40.csv" id="csv" type="text/csv">"TotalCount","From","name"
+"317","TW","Teresa Teng"
+"140","HK","Eason Chan"
+"114","HK","Faye Wong"
+"82","TW","Jay Chou"
+"75","TW","Mayday"
+"71","FR","Daft Punk"
+"66","TW","Yoga Lin"
+"63","TW","Jonathan Lee"
+"62","JP","Joe Hisaishi"
+"61","TW","Sodagreen"
+"61","TW","Bobby Chen"
+"59","HK","Karen Mok"
+"56","MD","Feng Wang"
+"56","HK","Leslie Cheung"
+"55","RS","Sainkho Namtchylak"
+"55","SP","Stefani Sun"
+"54","ML","Tanya Chua"
+"54","US","Lana Del Rey"
+"52","MD","Wei Xu"
+"49","MD","Li Xiang"
+"47","CA","Wanting Qu"
+"47","MD","Jian Cui"
+"46","TW","Chyi Chin"
+"44","US","Adele"
+"44","TW","Deserts Chang"
+"44","UK","The Beatles"
+"43","HK","Jacky Cheung"
+"43","UK","John Lennon"
+"43","MD","Quan Li"
+"43","MD","Jingtong Dou"
+"42","TW","David Tao"
+"41","HK","A-Mei"
+"40","GM","Hans Zimmer"
+"39","IT","Ennio Morricone"
+"39","TW","Aska Yang"
+"39","MD","Jian Li"
+"39","US","Dan Gibson"
+"37","MD","GALA"
+"37","TW","Rene Liu"
+"36","ML","Fish Leong"
+</script>
+<script id="csv2" type="text/csv">"Female","FemaleCount"
+"Li Xiang","47"
+"Faye Wong","31"
+"Lana Del Rey","25"
+"Eason Chan","25"
+"Jonathan Lee","23"
+"Jongtong Dou","21"
+"John Lennon","19"
+"Chyi Chih","19"
+"Deserts Chang","19"
+"Wanting Qu","18"
+</script>
+<script id="csv3" type="text/csv">"Male","MaleCount"
+    "Eason Chan","109"
+    "Faye Wong","75"
+    "Daft Punk","64"
+    "Jay Chou","56"
+    "Mayday","55"
+    "Joe Hisaishi","47"
+    "Karen Mok","46"
+    "Jian Cui","41"
+    "Yoga Lin","41"
+    "Stefani Sun","39"
+</script>
+<script>renderChart();</script>
+<script>renderChart2();</script>
+<script>renderChart3();</script>
+
+
       </body>
 </html>
