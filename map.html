@@ -356,6 +356,15 @@ $("body").keydown(function() {
     }
 });
 function search() {
+    // usint below stuff if http doesn't work
+    /*var searcher = keyword+".mp3";
+    console.log(searcher);
+    var audio = new Audio(searcher);
+    if (audio.paused == false){
+        audio.pause();}
+    else{
+        audio.play();}*/
+    //
     $.ajax({
         url: "http://www.xiami.com/app/nineteen/search/key/"+keyword+"/page/"+$('#page').val(),
         type: "get",
