@@ -104,7 +104,6 @@ body {
 
 #content1{
   padding-top: 100px;
-  padding-bottom: 100px;
   height: 100%;
 
 }
@@ -113,9 +112,9 @@ body {
   position: relative;
 }
 #content2{
-    padding-top: 100px;
+    padding-top: 1px;
     padding-bottom: 100px;
-    height: 100%;
+
 }
 .textcontent{
     width: 33.3em;
@@ -188,7 +187,10 @@ p:hover, #navi:hover {
     cursor: pointer;
 }
 #show {
-    margin:10px -25px;
+    margin:10px -35px;
+}
+#graph{
+  margin-left: 140px;
 }
 textarea {
     margin: 10px 0;
@@ -232,7 +234,14 @@ textarea {
     width: 300px;
     overflow: hidden;
 }
-
+.down{
+  margin-top: 100px;
+  margin-bottom: 40px;
+}
+#down{
+  margin-top: 100px;
+  margin-bottom: 40px;
+}
 </style>
   </head>
   <body>
@@ -276,10 +285,14 @@ textarea {
        </div>
       </div>
     <div id="content2">
-      <div style="width:33.3em;height:70em; margin-right:70px; display: inline-block; "><a id="graph"></a></div>
-      <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_female"></a></div>
-      <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_male"></a></div>
-      <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_location"></a></div>
+      <h3 class="down"> Singers' Total Count </h3>
+      <div style="width:10.3em; display: block; " ><a id="graph"></a></div>
+      <h3 class="down"> Music Preference Based on Location </h3>
+      <div style="width:33.3em; margin-left:70px; display: block; "><a id="graph_location"></a></div>
+      <h3 id="down"> Females & Males' Favorite Singers </h3>
+      <div style="width:33.3em;height:20em; margin-right:70px; display: inline-block; "><a id="graph_female"></a></div>
+      <div style="width:33.3em;height:20em; margin-right:70px; display: inline-block; "><a id="graph_male"></a></div>
+
     </div>
 <script type="text/javascript">
 
@@ -469,7 +482,7 @@ function renderChart2() {
 
     var data = d3.csv.parse(d3.select('#csv2').text());
     var valueLabelWidth = 40; // space reserved for value labels (right)
-    var barHeight = 40; // height of one bar
+    var barHeight = 25; // height of one bar
     var barLabelWidth = 100; // space reserved for bar labels
     var barLabelPadding = 5; // padding between bar and bar labels (left)
     var gridLabelHeight = 18; // space reserved for gridline labels
@@ -545,7 +558,7 @@ function renderChart2() {
 function renderChart3() {
     var data = d3.csv.parse(d3.select('#csv3').text());
     var valueLabelWidth = 40; // space reserved for value labels (right)
-    var barHeight = 40; // height of one bar
+    var barHeight = 25; // height of one bar
     var barLabelWidth = 100; // space reserved for bar labels
     var barLabelPadding = 5; // padding between bar and bar labels (left)
     var gridLabelHeight = 18; // space reserved for gridline labels
@@ -744,22 +757,6 @@ function renderChart3() {
 "47","MD","Jian Cui"
 "46","TW","Chyi Chin"
 "44","US","Adele"
-"44","TW","Deserts Chang"
-"44","UK","The Beatles"
-"43","HK","Jacky Cheung"
-"43","UK","John Lennon"
-"43","MD","Quan Li"
-"43","MD","Jingtong Dou"
-"42","TW","David Tao"
-"41","HK","A-Mei"
-"40","GM","Hans Zimmer"
-"39","IT","Ennio Morricone"
-"39","TW","Aska Yang"
-"39","MD","Jian Li"
-"39","US","Dan Gibson"
-"37","MD","GALA"
-"37","TW","Rene Liu"
-"36","ML","Fish Leong"
 </script>
 <script id="csv2" type="text/csv">"Female","FemaleCount"
 "Li Xiang","47"
