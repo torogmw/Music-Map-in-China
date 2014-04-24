@@ -112,6 +112,26 @@ body {
     height: 100%;
 }
 
+#graph_location {
+    font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.bar {
+    fill: steelblue;
+}
+
+.x.axis path {
+    display: none;
+}
+
+
 #text{
   text-align: left;
   font-size: 20px;
@@ -234,6 +254,7 @@ textarea {
       <div style="width:33.3em;height:70em; margin-right:70px; display: inline-block; "><a id="graph"></a></div>
       <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_female"></a></div>
       <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_male"></a></div>
+      <div style="width:33.3em;height:30em; margin-right:70px; display: inline-block; "><a id="graph_location"></a></div>
     </div>
 <script type="text/javascript">
 
@@ -325,7 +346,7 @@ function show(id) {
     //$('#show').append('<br><textarea style="width:394px;height:150px;">'+html+'</textarea>');
 }
 
-// for overall barchart
+// ************* for overall ***************** //
 function renderChart() {
     var data = d3.csv.parse(d3.select('#csv').text());
     var valueLabelWidth = 50; // space reserved for value labels (right)
@@ -418,7 +439,7 @@ function renderChart() {
             .style("stroke", "#000");
 
 }
-// for female bar chart
+// ************* for female ***************** //
 function renderChart2() {
 
     var data = d3.csv.parse(d3.select('#csv2').text());
@@ -495,7 +516,7 @@ function renderChart2() {
             .style("stroke", "#000");
 }
 
-// for male
+// ************* for male ***************** //
 function renderChart3() {
     var data = d3.csv.parse(d3.select('#csv3').text());
     var valueLabelWidth = 40; // space reserved for value labels (right)
@@ -571,10 +592,102 @@ function renderChart3() {
             .style("stroke", "#000");
 
 }
+
+// ************* for location ***************** //
+    function locationChart(){
+        var margin = {top: 20, right: 20, bottom: 30, left: 40},
+                width = 960 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+        var x0 = d3.scale.ordinal()
+                .rangeRoundBands([0, width], .1);
+
+        var x1 = d3.scale.ordinal();
+
+        var y = d3.scale.linear()
+                .range([height, 0]);
+
+        var color = d3.scale.ordinal()
+                .range(["#3333FF", "#3399FF", "#6699FF", "#99CCFF", "#CCCCFF", "#FFFFFF", "#FFFFCC"]);
+
+        var xAxis = d3.svg.axis()
+                .scale(x0)
+                .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .tickFormat(d3.format(".2s"));
+
+        var svg = d3.select("#graph_location").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("location.csv", function(error, data) {
+            var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "State"; });
+
+            data.forEach(function(d) {
+                d.ages = ageNames.map(function(name) { return {name: name, value: +d[name]}; });
+            });
+
+            x0.domain(data.map(function(d) { return d.State; }));
+            x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
+            y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
+
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis);
+
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text("Count");
+
+            var state = svg.selectAll(".state")
+                    .data(data)
+                    .enter().append("g")
+                    .attr("class", "g")
+                    .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; });
+
+            state.selectAll("rect")
+                    .data(function(d) { return d.ages; })
+                    .enter().append("rect")
+                    .attr("width", x1.rangeBand())
+                    .attr("x", function(d) { return x1(d.name); })
+                    .attr("y", function(d) { return y(d.value); })
+                    .attr("height", function(d) { return height - y(d.value); })
+                    .style("fill", function(d) { return color(d.name); });
+
+            var legend = svg.selectAll(".legend")
+                    .data(ageNames.slice().reverse())
+                    .enter().append("g")
+                    .attr("class", "legend")
+                    .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+            legend.append("rect")
+                    .attr("x", width - 18)
+                    .attr("width", 18)
+                    .attr("height", 18)
+                    .style("fill", color);
+
+            legend.append("text")
+                    .attr("x", width - 24)
+                    .attr("y", 9)
+                    .attr("dy", ".35em")
+                    .style("text-anchor", "end")
+                    .text(function(d) { return d; });
+
+        });
+    }
 </script>
-
-
-
 <script src = "Top_40.csv" id="csv" type="text/csv">"TotalCount","From","name"
 "317","TW","Teresa Teng"
 "140","HK","Eason Chan"
@@ -630,21 +743,21 @@ function renderChart3() {
 "Wanting Qu","18"
 </script>
 <script id="csv3" type="text/csv">"Male","MaleCount"
-    "Eason Chan","109"
-    "Faye Wong","75"
-    "Daft Punk","64"
-    "Jay Chou","56"
-    "Mayday","55"
-    "Joe Hisaishi","47"
-    "Karen Mok","46"
-    "Jian Cui","41"
-    "Yoga Lin","41"
-    "Stefani Sun","39"
+    Eason Chan,"109"
+    Faye Wong,"75"
+    Daft Punk,"64"
+    Jay Chou,"56"
+    Mayday,"55"
+    Joe Hisaishi,"47"
+    Karen Mok,"46"
+    Jian Cui,"41"
+    Yoga Lin,"41"
+    Stefani Sun,"39"
 </script>
 <script>renderChart();</script>
 <script>renderChart2();</script>
 <script>renderChart3();</script>
-
+<script>locationChart();</script>
 
       </body>
 </html>
