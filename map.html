@@ -53,7 +53,7 @@ body {
 }
 .header {
   padding-top: 20px;
-  padding-left: 160px;
+  padding-left: 120px;
   padding-right: 160px;
 }
 /*
@@ -62,6 +62,8 @@ body {
 .masthead-brand {
   margin-top: 10px;
   margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 200px;
 }
 
 .masthead-nav > li {
@@ -73,7 +75,7 @@ body {
 .masthead-nav > li > a {
   padding-right: 0;
   padding-left: 0;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
   color: #fff; /* IE8 proofing */
   color: rgba(255,255,255,.75);
@@ -104,14 +106,26 @@ body {
   padding-top: 100px;
   padding-bottom: 100px;
   height: 100%;
-}
 
+}
+.innertext{
+  width: 250px;
+  position: relative;
+}
 #content2{
     padding-top: 100px;
     padding-bottom: 100px;
     height: 100%;
 }
-
+.textcontent{
+    width: 33.3em;
+    max-width: 33.3em;
+    margin-right: 70px; 
+    margin-left: 20px;
+    margin-top: -5px;
+    font-size: 17px;
+    display: inline-block; 
+}
 #graph_location {
     font: 10px sans-serif;
 }
@@ -134,7 +148,8 @@ body {
 
 #text{
   text-align: left;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 300px;
 }
 /* player style */
 #text {
@@ -144,11 +159,19 @@ body {
     width: 302px;
     padding: 5px;
 }
+#audio{
+  display: inline-block;
+  position: absolute;
+  margin-top: 10px;
+  margin-left:35px;
+}
 #list {
     display:none;
     border: 1px solid black;
-    width: 312px;
+    width: 250px;
     margin-top: -1px;
+    margin-left: -30px;
+    font-size: 15px;
 }
 p {
     margin: 0;
@@ -165,7 +188,7 @@ p:hover, #navi:hover {
     cursor: pointer;
 }
 #show {
-    margin:10px 0;
+    margin:10px -25px;
 }
 textarea {
     margin: 10px 0;
@@ -222,23 +245,25 @@ textarea {
               </ul>
     </div>
     <div id="content1">
-      <div id="map_canvas" style="width:70em;height:70em; display: inline-block;"><a id="map"></a></div>
-      <div id="text" style="width:25.3em;max-width:30.3em;height:40em; float:right; margin-right:70px; display: inline-block; border-style:groove; border-color:#A1A1A1; border-width:5px; position:relative;">
-        <div class="innertext"style="margin-left:15px;margin-top:15px;">
-        Click the city to see related information</br>
-        Location:
-        <div id="city" style="width:33.3em;max-width:33.3em;margin-right:70px; margin-left:15px;display: inline-block;  "></div>
-        Singer:
-        <div id="singer" style="width:33.3em;max-width:33.3em;  margin-right:70px;margin-left:15px; display: inline-block;  "></div>
-        Score:
-        <div id="score" style="width:33.3em;max-width:33.3em;  margin-right:70px;margin-left:15px; display: inline-block; "></div>
-        Genre:
-        <div id="genre" style="width:33.3em;max-width:33.3em;  margin-right:70px;margin-left:15px; display: inline-block; "></div>
-        Link:
-        <div id="link" style="width:33.3em;max-width:33.3em; margin-right:70px;margin-left:15px; display:inline-block; "></div>
-        BioInfo:
-        <div id="bio" style="width:33.3em;max-width:33.3em;  margin-right:70px; margin-left:15px;display: inline-block;  "></div>
+      <div id="map_canvas" style="width:35em;height:35em; display: inline-block; margin-left:40px; "><a id="map"></a></div>
+      <div id="text" style="width:35.3em;max-width:30.3em;height:27em; float:right; margin-right:40px; display: inline-block; border-style:groove; border-color:#A1A1A1; border-width:5px; position:relative; ">
+        <h4 style="text-align:center;">Click the city to see related information</br></h4>
+        <div class="innertext"style="margin-left:15px;margin-top:5px;display: inline-block;">
+        
+        <h4>Location:</h4>
+        <div id="city" class="textcontent"></div>
+        <h4>Singer:</h4>
+        <div id="singer" class="textcontent"></div>
+        <h4>Score:</h4>
+        <div id="score" class="textcontent"></div>
+        <h4>Genre:</h4>
+        <div id="genre" class="textcontent"></div>
+        <h4>Link:</h4>
+        <div id="link" class="textcontent"></div>
+        <h4>BioInfo:</h4>
+        <div id="bio" class="textcontent"></div>
         </div>
+        <div id="audio">  
           <input type="hidden" id="page" value="1">
           <button onclick="$('#result').html('');search();">Audio Preview</button>
           <div id="list">
@@ -248,7 +273,7 @@ textarea {
           <div id="show">
           </div>
          </div>
-
+       </div>
       </div>
     <div id="content2">
       <div style="width:33.3em;height:70em; margin-right:70px; display: inline-block; "><a id="graph"></a></div>
@@ -274,7 +299,7 @@ $('#map_canvas').gmap({'center': yourStartLatLng, 'zoom':4}).bind('init', functi
       .click(function() {
         
         $( "#city").html(function(){
-          return marker['Location']+"     "+marker['Location_C'];
+          return marker['Location_C']+"     "+marker['Location'];
         });
         $( "#singer").html(function(){
             var k = marker['Singer'].toString();
@@ -282,7 +307,7 @@ $('#map_canvas').gmap({'center': yourStartLatLng, 'zoom':4}).bind('init', functi
             keyword = ck;
             if (!keyword) keyword = k;
 
-          return marker['Singer']+"     "+marker['Singer_C'];
+          return marker['Singer_C']+"     "+marker['Singer'];
         });
         $( "#score").html(function(){
           return marker['Score'];
@@ -593,101 +618,107 @@ function renderChart3() {
 
 }
 
-// ************* for location ***************** //
-    function locationChart(){
-        var margin = {top: 20, right: 20, bottom: 30, left: 40},
-                width = 960 - margin.left - margin.right,
-                height = 500 - margin.top - margin.bottom;
-
-        var x0 = d3.scale.ordinal()
-                .rangeRoundBands([0, width], .1);
-
-        var x1 = d3.scale.ordinal();
-
-        var y = d3.scale.linear()
-                .range([height, 0]);
-
-        var color = d3.scale.ordinal()
-                .range(["#3333FF", "#3399FF", "#6699FF", "#99CCFF", "#CCCCFF", "#FFFFFF", "#FFFFCC"]);
-
-        var xAxis = d3.svg.axis()
-                .scale(x0)
-                .orient("bottom");
-
-        var yAxis = d3.svg.axis()
-                .scale(y)
-                .orient("left")
-                .tickFormat(d3.format(".2s"));
-
-        var svg = d3.select("#graph_location").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        d3.csv("location.csv", function(error, data) {
-            var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "State"; });
-
-            data.forEach(function(d) {
-                d.ages = ageNames.map(function(name) { return {name: name, value: +d[name]}; });
-            });
-
-            x0.domain(data.map(function(d) { return d.State; }));
-            x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
-            y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
-
-            svg.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(xAxis);
-
-            svg.append("g")
-                    .attr("class", "y axis")
-                    .call(yAxis)
-                    .append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", 6)
-                    .attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text("Count");
-
-            var state = svg.selectAll(".state")
-                    .data(data)
-                    .enter().append("g")
-                    .attr("class", "g")
-                    .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; });
-
-            state.selectAll("rect")
-                    .data(function(d) { return d.ages; })
-                    .enter().append("rect")
-                    .attr("width", x1.rangeBand())
-                    .attr("x", function(d) { return x1(d.name); })
-                    .attr("y", function(d) { return y(d.value); })
-                    .attr("height", function(d) { return height - y(d.value); })
-                    .style("fill", function(d) { return color(d.name); });
-
-            var legend = svg.selectAll(".legend")
-                    .data(ageNames.slice().reverse())
-                    .enter().append("g")
-                    .attr("class", "legend")
-                    .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
-            legend.append("rect")
-                    .attr("x", width - 18)
-                    .attr("width", 18)
-                    .attr("height", 18)
-                    .style("fill", color);
-
-            legend.append("text")
-                    .attr("x", width - 24)
-                    .attr("y", 9)
-                    .attr("dy", ".35em")
-                    .style("text-anchor", "end")
-                    .text(function(d) { return d; });
-
-        });
-    }
 </script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script>
+        // ************* for location ***************** //
+        function locationChart(){
+            var margin = {top: 20, right: 20, bottom: 30, left: 40},
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+
+            var x0 = d3.scale.ordinal()
+                    .rangeRoundBands([0, width], .1);
+
+            var x1 = d3.scale.ordinal();
+
+            var y = d3.scale.linear()
+                    .range([height, 0]);
+
+            var color = d3.scale.ordinal()
+                    .range(["#3333FF", "#3399FF", "#6699FF", "#99CCFF", "#CCCCFF", "#FFFFFF", "#FFFFCC"]);
+
+            var xAxis = d3.svg.axis()
+                    .scale(x0)
+                    .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left")
+                    .tickFormat(d3.format(".2s"));
+
+            var svg = d3.select("#graph_location").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .attr("fill", "white")
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            d3.csv("location.csv", function(error, data) {
+                var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "State"; });
+
+                data.forEach(function(d) {
+                    d.ages = ageNames.map(function(name) { return {name: name, value: +d[name]}; });
+                });
+
+                x0.domain(data.map(function(d) { return d.State; }));
+                x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
+                y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
+
+                svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
+
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis)
+                        .append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("fill", "white")
+                        .attr("y", 6)
+                        .attr("dy", ".71em")
+                        .style("text-anchor", "end")
+                        .text("Count");
+
+                var state = svg.selectAll(".state")
+                        .data(data)
+                        .enter().append("g")
+                        .attr("class", "g")
+                        .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; });
+
+                state.selectAll("rect")
+                        .data(function(d) { return d.ages; })
+                        .enter().append("rect")
+                        .attr("width", x1.rangeBand())
+                        .attr("x", function(d) { return x1(d.name); })
+                        .attr("y", function(d) { return y(d.value); })
+                        .attr("height", function(d) { return height - y(d.value); })
+                        .style("fill", function(d) { return color(d.name); });
+
+                var legend = svg.selectAll(".legend")
+                        .data(ageNames.slice().reverse())
+                        .enter().append("g")
+                        .attr("class", "legend")
+                        .attr("fill", "white")
+                        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+                legend.append("rect")
+                        .attr("x", width - 18)
+                        .attr("width", 18)
+                        .attr("height", 18)
+                        .style("fill", color);
+
+                legend.append("text")
+                        .attr("x", width - 24)
+                        .attr("y", 9)
+                        .attr("dy", ".35em")
+                        .style("text-anchor", "end")
+                        .text(function(d) { return d; });
+
+            });
+        }
+    </script>
 <script src = "Top_40.csv" id="csv" type="text/csv">"TotalCount","From","name"
 "317","TW","Teresa Teng"
 "140","HK","Eason Chan"
